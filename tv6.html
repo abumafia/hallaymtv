@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online TV</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: black; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .container { position: relative; width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        video { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+        .overlay { position: absolute; top: 10px; left: 10px; z-index: 10; }
+        .footer { position: absolute; bottom: 10px; width: 100%; text-align: center; color: white; font-size: 14px; }
+        
+        @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-out { animation: fadeOut 1s forwards; }
+.fade-in { animation: fadeIn 1s forwards; }
+.transition-screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    opacity: 0;
+    z-index: 9;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://cdn-icons-png.flaticon.com/128/15317/15317858.png" alt="TV Logo" class="overlay" width="100">
+        <video id="tvPlayer" autoplay playsinline></video>
+        <div id="transitionScreen" class="transition-screen">Wait! Reconnecting...</div>
+
+        <div class="footer">
+            <p>&copy; 2025 Online TV | Barcha huquqlar himoyalangan | <a href="#">Aloqa</a> | <a href="#">Social</a></p>
+        </div>
+    </div>
+
+    <script>
+        const videos = [
+            { src: "https://www.dropbox.com/scl/fi/8m8d6b8qil95v40nzkdqr/power-of-ai.-trend-video..mp4?rlkey=js75mbspjalvcapknyvfpufao&st=tucx8w53&raw=1", duration: 10 },
+            { src: "https://www.dropbox.com/scl/fi/dr6c1tj08wucse1yj6w8u/Black-and-Yellow-Illustrated-Happy-Birthday-Mobile-Video.mp4?rlkey=rjx1hvkr2pgnvu312jxs6tunn&st=cuc4d6rh&raw=1", duration: 30 },
+            { src: "https://www.dropbox.com/scl/fi/7j7d4kbtbeskha4gn47ly/hi-everyone-yesterday-I-bought-instagram-account-from-hallaym-mywindo.mp4?rlkey=snjh1khsftoi5yp3mgm3sr3sy&st=fp4e769l&raw=1", duration: 15 }
+        ];
+
+        const videoElement = document.getElementById("tvPlayer");
+        let totalDuration = videos.reduce((sum, vid) => sum + vid.duration, 0);
+        let globalStartTime = Math.floor(Date.now() / 1000) % totalDuration;
+
+        function getCurrentVideo(time) {
+            let elapsed = 0;
+            for (let i = 0; i < videos.length; i++) {
+                elapsed += videos[i].duration;
+                if (time < elapsed) {
+                    return { index: i, startTime: time - (elapsed - videos[i].duration) };
+                }
+            }
+            return { index: 0, startTime: 0 };
+        }
+
+        function playVideo() {
+            let { index, startTime } = getCurrentVideo(globalStartTime);
+            videoElement.src = videos[index].src;
+            videoElement.currentTime = startTime;
+            videoElement.play();
+
+            let remainingTime = videos[index].duration - startTime;
+            setTimeout(() => {
+                globalStartTime = (globalStartTime + remainingTime) % totalDuration;
+                playVideo();
+            }, remainingTime * 1000);
+        }
+
+        playVideo();
+    </script>
+</body>
+</html>
